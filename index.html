@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+        .chat
+        {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        .chat li
+        {
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px dotted #B3A9A9;
+        }
+
+        .chat li.left .chat-body
+        {
+            margin-left: 60px;
+        }
+
+        .chat li.right .chat-body
+        {
+            margin-right: 60px;
+        }
+
+
+        .chat li .chat-body p
+        {
+            margin: 0;
+            color: #777777;
+        }
+
+        .panel .slidedown .glyphicon, .chat .glyphicon
+        {
+            margin-right: 5px;
+        }
+
+        .panel-body
+        {
+            overflow-y: scroll;
+            height: 250px;
+        }
+
+        ::-webkit-scrollbar-track
+        {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar
+        {
+            width: 12px;
+            background-color: #F5F5F5;
+        }
+
+        ::-webkit-scrollbar-thumb
+        {
+            -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+            background-color: #555;
+        }
+
+    </style>
+  </head>
+  <body>
+    <div class="container">
+    <div class="row">
+        <div class="col-md-5">
+            <div class="panel panel-primary">
+                <div class="panel-body">
+                    <ul class="chat">
+                        <!-- <li class="left clearfix"><span class="chat-img pull-left"> -->
+                            <!-- <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" /> -->
+                        <!-- </span> -->
+                            <!-- <div class="chat-body clearfix"> -->
+                                <!-- <div class="header"> -->
+                                    <!-- <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted"> -->
+                                        <!-- <span class="glyphicon glyphicon-time"></span>12 mins ago</small> -->
+                                <!-- </div> -->
+                                <!-- <p> -->
+                                    <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare -->
+                                    <!-- dolor, quis ullamcorper ligula sodales. -->
+                                <!-- </p> -->
+                            <!-- </div> -->
+                        <!-- </li> -->
+                        <!-- <li class="right clearfix"><span class="chat-img pull-right"> -->
+                            <!-- <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" /> -->
+                        <!-- </span> -->
+                            <!-- <div class="chat-body clearfix"> -->
+                                <!-- <div class="header"> -->
+                                    <!-- <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>13 mins ago</small> -->
+                                    <!-- <strong class="pull-right primary-font">Bhaumik Patel</strong> -->
+                                <!-- </div> -->
+                                <!-- <p> -->
+                                    <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare -->
+                                    <!-- dolor, quis ullamcorper ligula sodales. -->
+                                <!-- </p> -->
+                            <!-- </div> -->
+                        <!-- </li> -->
+                        <!-- <li class="left clearfix"><span class="chat-img pull-left"> -->
+                            <!-- <img src="http://placehold.it/50/55C1E7/fff&text=U" alt="User Avatar" class="img-circle" /> -->
+                        <!-- </span> -->
+                            <!-- <div class="chat-body clearfix"> -->
+                                <!-- <div class="header"> -->
+                                    <!-- <strong class="primary-font">Jack Sparrow</strong> <small class="pull-right text-muted"> -->
+                                        <!-- <span class="glyphicon glyphicon-time"></span>14 mins ago</small> -->
+                                <!-- </div> -->
+                                <!-- <p> -->
+                                    <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare -->
+                                    <!-- dolor, quis ullamcorper ligula sodales. -->
+                                <!-- </p> -->
+                            <!-- </div> -->
+                        <!-- </li> -->
+                        <!-- <li class="right clearfix"><span class="chat-img pull-right"> -->
+                            <!-- <img src="http://placehold.it/50/FA6F57/fff&text=ME" alt="User Avatar" class="img-circle" /> -->
+                        <!-- </span> -->
+                            <!-- <div class="chat-body clearfix"> -->
+                                <!-- <div class="header"> -->
+                                    <!-- <small class=" text-muted"><span class="glyphicon glyphicon-time"></span>15 mins ago</small> -->
+                                    <!-- <strong class="pull-right primary-font">Bhaumik Patel</strong> -->
+                                <!-- </div> -->
+                                <!-- <p> -->
+                                    <!-- Lorem ipsum dolor sit amet, consectetur adipiscing elit. Curabitur bibendum ornare -->
+                                    <!-- dolor, quis ullamcorper ligula sodales. -->
+                                <!-- </p> -->
+                            <!-- </div> -->
+                        <!-- </li> -->
+                    </ul>
+                </div>
+                <div class="panel-footer">
+                    <div class="input-group">
+                        <form action=""> 
+                            <input id="btn-input" autocomplete="off" type="text" class="form-control input-sm" placeholder="Escribe un mensaje."/>
+                            <span class="input-group-btn">
+                                <button class="btn btn-warning btn-sm" id="btn-chat">Enviar</button>
+                            </span>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css">
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script>
+      $(function () {
+        window.onbeforeunload = function(e){
+            socket.emit('desconect', true);        
+            return;
+        }  
+        var socket = io('http://localhost:3000');
+        
+        <!-- socket.emit('userLogin', localstorage.getItem('uUID'); -->
+        $('form').submit(function(e){
+            e.preventDefault();
+            //Emito un evento y le mando el comentario
+            socket.emit('chat message', $('.panel-footer #btn-input').val());
+            //Limpio el cambio del comentario
+            $('.panel-footer #btn-input').val('');
+            return false;
+        });
+        socket.on('historic',function(historic){
+            console.log(historic);
+            $.each(historic,function(index,value){
+                <!-- console.log( index + ": " + value.apellido ); -->
+                
+                $('.chat').append("<li class='right clearfix'>"+
+                                        "<span class='chat-img pull-right'>"+
+                                                "<img src='http://placehold.it/50/FA6F57/fff&text=ME' class='img-circle'/>"+
+                                        "</span>"+
+                                        "<div class='chat-body clearfix'>"+
+                                            "<div class='header'>"+
+                                                "<small class='text-muted'><span class='glyphicon glyphicon-time'></span>15 mins ago</small>"+
+                                                "<strong class='pull-right primary-font'>Bhaumik Patel</strong>"+
+                                            "</div>"+
+                                            "<p>" + value.nombre + "</p>"+
+                                        "</div>"+
+                                    "</li>");
+            });
+        });
+        socket.on('chat message', function(msg){
+            $('.chat').append("<li class='right clearfix'>"+
+                                    "<span class='chat-img pull-right'>"+
+                                            "<img src='http://placehold.it/50/FA6F57/fff&text=ME' class='img-circle'/>"+
+                                    "</span>"+
+                                    "<div class='chat-body clearfix'>"+
+                                        "<div class='header'>"+
+                                            "<small class='text-muted'><span class='glyphicon glyphicon-time'></span>15 mins ago</small>"+
+                                            "<strong class='pull-right primary-font'>Bhaumik Patel</strong>"+
+                                        "</div>"+
+                                        "<p>" + msg + "</p>"+
+                                    "</div>"+
+                                "</li>");
+        });
+        socket.on('user connected', function(msg){
+            console.log(msg);
+        });
+        
+        
+        //objeto para el manejo de sesiones
+        var manageSessions = {
+            //obtenemos una sesión //getter
+            get: function(key) {
+                return sessionStorage.getItem(key);
+            },
+            //creamos una sesión //setter
+            set: function(key, val) {
+                return sessionStorage.setItem(key, val);
+            },
+            //limpiamos una sesión
+            unset: function(key) {
+                return sessionStorage.removeItem(key);
+            }
+        };
+         
+        //función que comprueba si un objeto está vacio, devuelve un boolean
+        function isEmptyObject(obj){
+            var name;
+            for (name in obj) {
+                return false;
+            }
+            return true;
+        }
+      });
+    </script>
+  </body>
+</html>
